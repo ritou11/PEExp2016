@@ -1,14 +1,6 @@
-// TI File $Revision: /main/9 $
-// Checkin $Date: April 21, 2008   15:43:19 $
-//###########################################################################
-
-//###########################################################################
-// $TI Release: DSP2833x/DSP2823x C/C++ Header Files V1.31 $
-// $Release Date: August 4, 2009 $
-//###########################################################################
+//
 
 #include "DSP28x_Project.h"     // Device Headerfile and Examples Include File
-#include "Svpwm.h"
 
 #define ADCONST 0.00073242
 // Prototype statements for functions found within this file.
@@ -20,102 +12,11 @@ extern EPwmSetup();
 extern void InitXintf(void);
 
 //=======================================================================================//
-float EXT_position;
-
-
-int A,B;
-int IO1,IO2;
-int commond_I1= 0;
-int commond_I2=0;
-int commond_cnt=0;
-int commond = 0;
-int compare = 0;
-int compare_error_cnt = 0;
-int pulsecount=0;
-int breakopen = 0;
-int breakclose = 0;
-int IO_error_count = 0;
-int IO_error = 0;
-int I1=0;
-int I2=0;
-int I3=0;
-int I4=0;
-int I1_Old=0;
-int I2_Old=0;
-int I3_Old=0;
-int I4_Old=0;
-int O1;
-int O2;
-int EXT_DIN = 0;
-int EXT_DIN_old =0;
-int EXT_DIN_cnt=0;
-int EXT_DIN_time[60];
-int brake_cnt = 0;
-
-int wave_flag=1;    //录波标志
-int transfer_signal;	//数据从缓冲区开始转移到录波区的标志
-int ad_signal;			//地址传递标志
-long break_address;   //分（合）闸时刻指针所在位置
-
-int interrupt_time=0;	//进入主中断的次数
-int start_address;
-int kk=0;
-int j,k=0;
-long iw;
-
-int year=0;
-int month=0;
-int day=0;
-int hour=0;
-int minute=0;
-int second=0;
-int millisecond=0;
-int action_type;
-int filled_read=00;
-//int lmm;
-
-
-int scope_wave[50];
-int	scope_index0=0;
-int	scope_index1=1;
-int	scope_index2=2;
-int	scope_index3=3;
-int i_cnt = 0;
-int stop=0;
-int connect=0;
-int brake_rdy = 1;
-int brake_rdy_cnt = 0;
-int close_open_cnt = 0;
-float brake_speed_test;
-//=======================================================================================//
 float Id_Ref=0;
 float Iq_Ref=0;
 //==================================================================================//
-float Vdc;
+float Vuv = 0,Vvw = 0,Vwu = 0;
 float Iu=0, Iv=0, Iw=0;
-Uint16 AD2S_Position=0;
-Uint16 AD2S_Position_Fil=0;
-Uint16 AD2S_Position_Ini=0;
-Uint16 AD2S_Position_Pre=0;
-Uint16 AD2S_Position_Pre_Old=0;
-Uint16 AD2S_Position_Old[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-Uint16 AD2S_Position_H=0;
-Uint16 AD2S_Position_L=0;
-int16 AD2S_Speed=0;
-int16 AD2S_Speed_H=0;
-int16 AD2S_Speed_L=0;
-float P_Speed=0;//根据位置计算得到的电机转速
-float Speed=0;//根据旋变直接读出的速度
-float Speed_old=0;
-float Position=0;
-float Position_old=0;
-float Position_lpf=0;
-float Position_lpf_old=0;
-float ElePosition=0;
-
-float TargetPositionOld=0;//上一时刻位置给定
-
-float PositionRefOld[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//上一时刻给定位置，用于计算前馈速度
 //=======================================================================================//
 //	for internal AD converter
 int AD_chan0 = 0;
@@ -214,8 +115,6 @@ void main(void)
     ConfigCpuTimer(&CpuTimer0, 150, 1000);
     CpuTimer0Regs.TCR.bit.TSS = 0;
 
-    SCOPEINITNOLOOP();
-
     // This function initializes the Xintf to a known state.
 
     //configure for the EV module
@@ -269,8 +168,13 @@ interrupt void MainISR(void)
 	AD_chan14 = AdcRegs.ADCRESULT14>>4;
 	AD_chan15 = AdcRegs.ADCRESULT15>>4;
 
-	Vdc = AD_chan0*ADCONST;
+	Vuv = AD_chan0*ADCONST;
+	Vvw = AD_chan1*ADCONST;
+	Vwu = AD_chan2*ADCONST;
 
+	Iu = AD_chan3*ADCONST;
+	Iv = AD_chan4*ADCONST;
+	Iw = AD_chan5*ADCONST;
 	//if(Vdc>0.5) EPwm4Regs.CMPA.half.CMPA = 1000;
 	//else EPwm4Regs.CMPA.half.CMPA=11000;
 

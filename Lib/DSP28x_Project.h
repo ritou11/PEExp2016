@@ -17,9 +17,9 @@
 
 #include "DSP2833x_Device.h"     // DSP2833x Headerfile Include File
 #include "DSP2833x_Examples.h"   // DSP2833x Examples Include File
-#include "SCI28335_scia.h"
+#include "DSP2833x_EPwm.h"
+#include "DSP2833x_EPwm_defines.h"
 #include "User_Define.h"
-#include "PMSM_Control.h"
 
 #endif  // end of DSP28x_PROJECT_H definition
 
