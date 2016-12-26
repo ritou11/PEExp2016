@@ -25,19 +25,8 @@ int AD_chan2 = 0;
 int AD_chan3 = 0;
 int AD_chan4 = 0;
 int AD_chan5 = 0;
-int AD_chan6 = 0;
-int AD_chan7 = 0;
 
-int AD_chan8 = 0;
-int AD_chan9 = 0;
-int AD_chan10 = 0;
-int AD_chan11 = 0;
-int AD_chan12 = 0;
-int AD_chan13 = 0;
-int AD_chan14 = 0;
-int AD_chan15 = 0;
-
-	//用于电流采样的校正
+//用于电流采样的校正
 Uint32 AD_chan4_zero = 0;
 Uint32 AD_chan5_zero = 0;
 float AD_chan4_zero_float = 0;
@@ -103,12 +92,7 @@ void main(void)
 //	PieVectTable.WAKEINT 		= &PseudoWatchdogInterrupt;//WD
 	EDIS;   // Disable access to EALLOW protected registers
 
-	//EINT;  //使能全局中断
-	//ERTM;
-
     InitXintf();
-
-    InitSpi();
 
     //Timer0 Config
     InitCpuTimers();
@@ -157,16 +141,6 @@ interrupt void MainISR(void)
 	AD_chan3 = AdcRegs.ADCRESULT3>>4;
 	AD_chan4 = AdcRegs.ADCRESULT4>>4;
 	AD_chan5 = AdcRegs.ADCRESULT5>>4;
-	AD_chan6 = AdcRegs.ADCRESULT6>>4;
-	AD_chan7 = AdcRegs.ADCRESULT7>>4;
-	AD_chan8 = AdcRegs.ADCRESULT8>>4;
-	AD_chan9 = AdcRegs.ADCRESULT9>>4;
-	AD_chan10 = AdcRegs.ADCRESULT10>>4;
-	AD_chan11 = AdcRegs.ADCRESULT11>>4;
-	AD_chan12 = AdcRegs.ADCRESULT12>>4;
-	AD_chan13 = AdcRegs.ADCRESULT13>>4;
-	AD_chan14 = AdcRegs.ADCRESULT14>>4;
-	AD_chan15 = AdcRegs.ADCRESULT15>>4;
 
 	Vuv = AD_chan0*ADCONST;
 	Vvw = AD_chan1*ADCONST;
@@ -175,8 +149,9 @@ interrupt void MainISR(void)
 	Iu = AD_chan3*ADCONST;
 	Iv = AD_chan4*ADCONST;
 	Iw = AD_chan5*ADCONST;
-	//if(Vdc>0.5) EPwm4Regs.CMPA.half.CMPA = 1000;
-	//else EPwm4Regs.CMPA.half.CMPA=11000;
+
+	if(Vuv>0.5) EPwm4Regs.CMPA.half.CMPA = 1000;
+	else EPwm4Regs.CMPA.half.CMPA=11000;
 
 	EPwm1Regs.ETCLR.bit.INT = 1;
 	PieCtrlRegs.PIEACK.all |= PIEACK_GROUP3;

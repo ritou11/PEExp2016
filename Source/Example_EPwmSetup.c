@@ -119,10 +119,7 @@ void EPwmSetup()
 	EPwm1Regs.AQCTLB.bit.CAD = AQ_SET;
 	EPwm1Regs.AQCTLB.bit.CAU = AQ_CLEAR;
 
-	EPwm1Regs.DBCTL.bit.OUT_MODE = DB_FULL_ENABLE;
-	EPwm1Regs.DBCTL.bit.POLSEL = DB_ACTV_HIC;
-	EPwm1Regs.DBFED = 20;// dead band falling edge 4us
-	EPwm1Regs.DBRED = 20;//dead band rising edge 4us
+	EPwm1Regs.DBCTL.bit.OUT_MODE = DB_DISABLE;
 
 	EPwm1Regs.ETSEL.bit.SOCAEN = 1;
 	EPwm1Regs.ETSEL.bit.SOCASEL = 1;

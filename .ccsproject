@@ -10,4 +10,5 @@
 	<rts value="libc.a"/>
 	<templateProperties value="id=com.ti.common.project.core.emptyProjectTemplate,"/>
 	<deviceFamily value="C2000"/>
+	<isTargetManual value="false"/>
 </projectOptions>
