@@ -15,6 +15,10 @@
 	#define DSP_FREQ	 	100	
 #endif
 
+#define SWTICKS 22776
+
+//一区地址为0x004000-0x004FFF
+//CPLD只读区域   0x004000-0x00400F
 #define PWMFRQS			10		//Khz
 //#define PWMFRQS			4		//Khz
 #define PWMPERIOD		(long)DSP_FREQ * 1000/(2 * PWMFRQS)
@@ -27,10 +31,6 @@
 #define OVERLORDERR		18000
 #define CURLIMIT		((Uint32)PWMPERIOD * 768)
 #define VOLLIMIT		((Uint32)PWMPERIOD * 3/2)
-
-//一区地址为0x004000-0x004FFF
-//CPLD只读区域   0x004000-0x00400F
-
 
 
 #define	Fibra_In_Address								(volatile unsigned int *)0x004003		//R

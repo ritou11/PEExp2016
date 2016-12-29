@@ -20,6 +20,7 @@
 
 #include "DSP2833x_Device.h"     // DSP2833x Headerfile Include File
 #include "DSP2833x_Examples.h"   // DSP2833x Examples Include File
+#include "User_Define.h"
 
 #if (CPU_FRQ_150MHZ)
   #define CPU_CLK   150e6
@@ -31,7 +32,8 @@
 #define SP        CPU_CLK/(2*PWM_CLK)
 #define TBCTLVAL  0x200E              // Up-down cnt, timebase = SYSCLKOUT
 
-
+// SWTICKS % 3 = 0
+// SWTICKS %24 = 0
 void EPwmSetup()
 {
 	InitEPwmGpio();
@@ -40,7 +42,7 @@ void EPwmSetup()
 	// Initialization Time
 	//========================
 	// EPWM Module 1 config
-	EPwm4Regs.TBPRD = 18000; // Period = 900 TBCLK counts
+	EPwm4Regs.TBPRD = SWTICKS; // Period = 900 TBCLK counts
 	EPwm4Regs.TBPHS.half.TBPHS = 0; // Set Phase register to zero
 	EPwm4Regs.TBCTL.bit.CTRMODE = TB_COUNT_UPDOWN; // Symmetrical mode
 	EPwm4Regs.TBCTL.bit.PHSEN = TB_DISABLE; // Master module
@@ -58,8 +60,8 @@ void EPwmSetup()
 	EPwm4Regs.DBRED = 2000; // RED = 20 TBCLKs
 
 	// EPWM Module 2 config
-	EPwm5Regs.TBPRD = 18000; // Period = 900 TBCLK counts
-	EPwm5Regs.TBPHS.half.TBPHS = 12000; // Phase = 300/900 * 360 = 120 deg
+	EPwm5Regs.TBPRD = SWTICKS; // Period = 900 TBCLK counts
+	EPwm5Regs.TBPHS.half.TBPHS = SWTICKS/3*2; // Phase = 300/900 * 360 = 120 deg
 	EPwm5Regs.TBCTL.bit.CTRMODE = TB_COUNT_UPDOWN; // Symmetrical mode
 	EPwm5Regs.TBCTL.bit.PHSEN = TB_ENABLE; // Slave module
 	EPwm5Regs.TBCTL.bit.PHSDIR = TB_DOWN; // Count DOWN on sync (=120 deg)
@@ -76,8 +78,8 @@ void EPwmSetup()
 	EPwm5Regs.DBFED = 2000; // FED = 20 TBCLKs
 	EPwm5Regs.DBRED = 2000; // RED = 20 TBCLKs
 	// EPWM Module 3 config
-	EPwm6Regs.TBPRD = 18000; // Period = 900 TBCLK counts
-	EPwm6Regs.TBPHS.half.TBPHS = 12000; // Phase = 300/900 * 360 = 120 deg
+	EPwm6Regs.TBPRD = SWTICKS; // Period = 900 TBCLK counts
+	EPwm6Regs.TBPHS.half.TBPHS = SWTICKS/3*2; // Phase = 300/900 * 360 = 120 deg
 	EPwm6Regs.TBCTL.bit.CTRMODE = TB_COUNT_UPDOWN; // Symmetrical mode
 	EPwm6Regs.TBCTL.bit.PHSEN = TB_ENABLE; // Slave module
 	EPwm5Regs.TBCTL.bit.PHSDIR = TB_UP; // Count UP on sync (=240 deg)
@@ -95,11 +97,11 @@ void EPwmSetup()
 	EPwm6Regs.DBRED = 2000; // RED = 20 TBCLKs
 	// Run Time (Note: Example execution of one run-time instant)
 	//===========================================================
-	EPwm4Regs.CMPA.half.CMPA = 9000; // adjust duty for output EPWM1A
-	EPwm5Regs.CMPA.half.CMPA = 9000; // adjust duty for output EPWM2A
-	EPwm6Regs.CMPA.half.CMPA = 9000; // adjust duty for output EPWM3A
+	EPwm4Regs.CMPA.half.CMPA = SWTICKS/2; // adjust duty for output EPWM1A
+	EPwm5Regs.CMPA.half.CMPA = SWTICKS/2; // adjust duty for output EPWM2A
+	EPwm6Regs.CMPA.half.CMPA = SWTICKS/2; // adjust duty for output EPWM3A
 
-	EPwm1Regs.TBPRD = 18000;// TPwm=2*PWMPERIOD*SysClock
+	EPwm1Regs.TBPRD = SWTICKS/78;// TPwm=2*PWMPERIOD*SysClock
 	EPwm1Regs.TBPHS.all = 0;     // the counter value when there is a synchronize signal
 
 	EPwm1Regs.TBCTL.bit.CLKDIV = 0;

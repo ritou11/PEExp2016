@@ -36,10 +36,10 @@ void InitAdc(void)
 	// See the device data manual and/or the ADC Reference
 	// Manual for more information.
 
-	EALLOW;
-	SysCtrlRegs.PCLKCR0.bit.ADCENCLK = 1;//
-	ADC_cal();
-	EDIS;
+	    EALLOW;
+		SysCtrlRegs.PCLKCR0.bit.ADCENCLK = 1;//
+		ADC_cal();
+		EDIS;
 
 	AdcRegs.ADCTRL1.bit.RESET = 1;		// Reset the ADC module
 	asm(" RPT #10 || NOP");				// Must wait 12-cycles (worst-case) for ADC reset to take effect
@@ -78,7 +78,7 @@ void InitAdc(void)
 //    DELAY_US(ADC_usDELAY);         // Delay before converting ADC channels
 
 	    //--------------------------------------------------------------------------//
-	     AdcRegs.ADCMAXCONV.bit.MAX_CONV1 = 0x5;  // convert and store in 8 results registers
+	     AdcRegs.ADCMAXCONV.bit.MAX_CONV1 = 0xF;  // convert and store in 8 results registers
 
 	     AdcRegs.ADCCHSELSEQ1.bit.CONV00 = 0x0;
 	     AdcRegs.ADCCHSELSEQ1.bit.CONV01 = 0x1;
@@ -87,8 +87,21 @@ void InitAdc(void)
 
 	     AdcRegs.ADCCHSELSEQ2.bit.CONV04 = 0x4;
 	     AdcRegs.ADCCHSELSEQ2.bit.CONV05 = 0x5;
+	     AdcRegs.ADCCHSELSEQ2.bit.CONV06 = 0x6;
+	     AdcRegs.ADCCHSELSEQ2.bit.CONV07 = 0x7;
 
-	     AdcRegs.ADCTRL2.bit.EPWM_SOCA_SEQ1 = 1;
+	     AdcRegs.ADCCHSELSEQ3.bit.CONV08 = 0x8;
+	     AdcRegs.ADCCHSELSEQ3.bit.CONV09 = 0x9;
+	     AdcRegs.ADCCHSELSEQ3.bit.CONV10 = 0xa;
+	     AdcRegs.ADCCHSELSEQ3.bit.CONV11 = 0xb;
+
+	     AdcRegs.ADCCHSELSEQ4.bit.CONV12 = 0xc;
+	     AdcRegs.ADCCHSELSEQ4.bit.CONV13 = 0xd;
+	     AdcRegs.ADCCHSELSEQ4.bit.CONV14 = 0xe;
+	     AdcRegs.ADCCHSELSEQ4.bit.CONV15 = 0xf;
+
+	     //AdcRegs.ADCTRL2.bit.INT_ENA_SEQ1 = 0x1;
+	     AdcRegs.ADCTRL2.bit.EPWM_SOCA_SEQ1 = 0x1;
 	     //====================================================================//
 
     //AdcRegs.ADCTRL3.all = 0x00E0;  // Power up bandgap/reference/ADC circuits

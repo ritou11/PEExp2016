@@ -1,16 +1,35 @@
 //
 
 #include "DSP28x_Project.h"     // Device Headerfile and Examples Include File
+#include "math.h"
 
-#define ADCONST 0.00073242
+#define ADCONST 0.383376/500
 // Prototype statements for functions found within this file.
-Uint16 cpld_data[15];
+#define ACTRL_P 0.5
+#define BCTRL_P 0.5
+#define CCTRL_P 0.5
+
+#define CURRENT_AIM 1
+#define CURRENT_RATIO 10
+#define SIN(x) sin(x)
+#define COS(x) cos(x)
+
+#define PI2d3 2.094395
+
+#define IUCAL 1.671
+#define IVCAL 1.681
+#define IWCAL 1.722
+#define VUVCAL 1.635
+#define VVWCAL 1.655
+#define VWUCAL 1.628
 
 interrupt void MainISR(void);
 
 extern EPwmSetup();
 extern void InitXintf(void);
 
+extern void Update_SPLL(float Vuv,float Vvw,float Vwu);
+extern float Get_SPLL();
 //=======================================================================================//
 float Id_Ref=0;
 float Iq_Ref=0;
@@ -18,13 +37,13 @@ float Iq_Ref=0;
 float Vuv = 0,Vvw = 0,Vwu = 0;
 float Iu=0, Iv=0, Iw=0;
 //=======================================================================================//
+float atheta;
 //	for internal AD converter
-int AD_chan0 = 0;
-int AD_chan1 = 0;
-int AD_chan2 = 0;
-int AD_chan3 = 0;
-int AD_chan4 = 0;
-int AD_chan5 = 0;
+Uint32 innerCnt=0;
+Uint32 outerCnt=0;
+
+int32 sumCh0=0,sumCh1=0,sumCh2=0,sumCh3=0,sumCh4=0,sumCh5=0;
+//int quei1 = 0,quei2 = 0,quei3 = 0,quei4 = 0,quei5 = 0,quei6 = 0;
 
 //用于电流采样的校正
 Uint32 AD_chan4_zero = 0;
@@ -129,29 +148,50 @@ void main(void)
     }
 
 }
-
+Uint16 CurrentCtrl(float theta, float real, float p){
+	float out= (CURRENT_AIM*SIN(theta)-real*CURRENT_RATIO+1)*p;
+	if(out > 0.95) out = 0.95;
+	if(out < 0.05) out = 0.05;
+	return (Uint16)(out*SWTICKS);
+}
 /*================================================*/
 /* Description:	P/S/T control program			  */
 /*================================================*/
 interrupt void MainISR(void)
 {
-	AD_chan0 = AdcRegs.ADCRESULT0>>4;
-	AD_chan1 = AdcRegs.ADCRESULT1>>4;
-	AD_chan2 = AdcRegs.ADCRESULT2>>4;
-	AD_chan3 = AdcRegs.ADCRESULT3>>4;
-	AD_chan4 = AdcRegs.ADCRESULT4>>4;
-	AD_chan5 = AdcRegs.ADCRESULT5>>4;
+	outerCnt = (outerCnt+1) % 78;
+	innerCnt = (innerCnt+1) % 3;
 
-	Vuv = AD_chan0*ADCONST;
-	Vvw = AD_chan1*ADCONST;
-	Vwu = AD_chan2*ADCONST;
+	sumCh0 += AdcRegs.ADCRESULT0>>4;
+	sumCh1 += AdcRegs.ADCRESULT1>>4;
+	sumCh2 += AdcRegs.ADCRESULT2>>4;
+	sumCh3 += AdcRegs.ADCRESULT3>>4;
+	sumCh4 += AdcRegs.ADCRESULT4>>4;
+	sumCh5 += AdcRegs.ADCRESULT5>>4;
 
-	Iu = AD_chan3*ADCONST;
-	Iv = AD_chan4*ADCONST;
-	Iw = AD_chan5*ADCONST;
+	//float b = fmod(-3.1,2);
 
-	if(Vuv>0.5) EPwm4Regs.CMPA.half.CMPA = 1000;
-	else EPwm4Regs.CMPA.half.CMPA=11000;
+	if(!outerCnt){
+		Iu = (sumCh0*ADCONST)/78 - IUCAL;
+		Iv = (sumCh2*ADCONST)/78 - IVCAL;
+		Iw = (sumCh4*ADCONST)/78 - IWCAL;
+		sumCh0=sumCh2=sumCh4=0;
+		atheta=Get_SPLL();
+
+		EPwm4Regs.CMPA.half.CMPA = CurrentCtrl(atheta,Iu,ACTRL_P);
+		EPwm5Regs.CMPA.half.CMPA = CurrentCtrl(atheta-PI2d3,Iv,BCTRL_P);
+		EPwm6Regs.CMPA.half.CMPA = CurrentCtrl(atheta+PI2d3,Iw,CCTRL_P);
+	}
+	if(!innerCnt){
+		Vuv = sumCh1*ADCONST/3 - VUVCAL;
+		Vvw = sumCh3*ADCONST/3 - VVWCAL;
+		Vwu = sumCh5*ADCONST/3 - VWUCAL;
+		sumCh1=sumCh3=sumCh5=0;
+		Update_SPLL(Vuv,Vvw,Vwu);
+	}
+
+	//if(Vuv>0.5) EPwm4Regs.CMPA.half.CMPA = 1000;
+	//else EPwm4Regs.CMPA.half.CMPA=11000;
 
 	EPwm1Regs.ETCLR.bit.INT = 1;
 	PieCtrlRegs.PIEACK.all |= PIEACK_GROUP3;
