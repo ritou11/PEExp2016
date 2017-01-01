@@ -5,12 +5,12 @@
 
 #define ADCONST 0.383376/500
 // Prototype statements for functions found within this file.
-#define ACTRL_P 0.5
-#define BCTRL_P 0.5
-#define CCTRL_P 0.5
-
-#define CURRENT_AIM 1
-#define CURRENT_RATIO 10
+#define ACTRL_P 0.05
+#define BCTRL_P 0.05
+#define CCTRL_P 0.05
+//0.25A 41V
+#define CURRENT_AIM 10.0
+#define CURRENT_RATIO 1
 #define SIN(x) sin(x)
 #define COS(x) cos(x)
 
@@ -57,6 +57,8 @@ Uint16 *ExRamZ1Start=(Uint16*)0x210000;
 //Uint16 *ExRamZ3Start=(Uint16*)0x230000;
 //Uint16 *ExRamZ4Start=(Uint16*)0x240000;
 
+float myp=1.0*ACTRL_P;
+float caim = CURRENT_AIM;
 
 void main(void)
   {
@@ -149,7 +151,7 @@ void main(void)
 
 }
 Uint16 CurrentCtrl(float theta, float real, float p){
-	float out= (CURRENT_AIM*SIN(theta)-real*CURRENT_RATIO+1)*p;
+	float out= ((CURRENT_AIM*SIN(theta)-real)+1.0/2/p)*p;
 	if(out > 0.95) out = 0.95;
 	if(out < 0.05) out = 0.05;
 	return (Uint16)(out*SWTICKS);
@@ -178,9 +180,12 @@ interrupt void MainISR(void)
 		sumCh0=sumCh2=sumCh4=0;
 		atheta=Get_SPLL();
 
-		EPwm4Regs.CMPA.half.CMPA = CurrentCtrl(atheta,Iu,ACTRL_P);
-		EPwm5Regs.CMPA.half.CMPA = CurrentCtrl(atheta-PI2d3,Iv,BCTRL_P);
-		EPwm6Regs.CMPA.half.CMPA = CurrentCtrl(atheta+PI2d3,Iw,CCTRL_P);
+/*		EPwm4Regs.CMPA.half.CMPA = CurrentCtrl(atheta,Iu,ACTRL_P);
+		EPwm5Regs.CMPA.half.CMPA = CurrentCtrl(atheta+PI2d3,Iv,BCTRL_P);
+		EPwm6Regs.CMPA.half.CMPA = CurrentCtrl(atheta-PI2d3,Iw,CCTRL_P);*/
+		EPwm4Regs.CMPA.half.CMPA = CurrentCtrl(atheta,Iu,myp);
+		EPwm5Regs.CMPA.half.CMPA = CurrentCtrl(atheta+PI2d3,Iv,myp);
+		EPwm6Regs.CMPA.half.CMPA = CurrentCtrl(atheta-PI2d3,Iw,myp);
 	}
 	if(!innerCnt){
 		Vuv = sumCh1*ADCONST/3 - VUVCAL;

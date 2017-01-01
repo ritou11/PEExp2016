@@ -82,7 +82,7 @@ void EPwmSetup()
 	EPwm6Regs.TBPHS.half.TBPHS = SWTICKS/3*2; // Phase = 300/900 * 360 = 120 deg
 	EPwm6Regs.TBCTL.bit.CTRMODE = TB_COUNT_UPDOWN; // Symmetrical mode
 	EPwm6Regs.TBCTL.bit.PHSEN = TB_ENABLE; // Slave module
-	EPwm5Regs.TBCTL.bit.PHSDIR = TB_UP; // Count UP on sync (=240 deg)
+	EPwm6Regs.TBCTL.bit.PHSDIR = TB_UP; // Count UP on sync (=240 deg)
 	EPwm6Regs.TBCTL.bit.PRDLD = TB_SHADOW;
 	EPwm6Regs.TBCTL.bit.SYNCOSEL = TB_SYNC_IN; // sync flow-through
 	EPwm6Regs.CMPCTL.bit.SHDWAMODE = CC_SHADOW;
@@ -97,9 +97,9 @@ void EPwmSetup()
 	EPwm6Regs.DBRED = 2000; // RED = 20 TBCLKs
 	// Run Time (Note: Example execution of one run-time instant)
 	//===========================================================
-	EPwm4Regs.CMPA.half.CMPA = SWTICKS/2; // adjust duty for output EPWM1A
-	EPwm5Regs.CMPA.half.CMPA = SWTICKS/2; // adjust duty for output EPWM2A
-	EPwm6Regs.CMPA.half.CMPA = SWTICKS/2; // adjust duty for output EPWM3A
+	EPwm4Regs.CMPA.half.CMPA = SWTICKS/4; // adjust duty for output EPWM1A
+	EPwm5Regs.CMPA.half.CMPA = SWTICKS/4; // adjust duty for output EPWM2A
+	EPwm6Regs.CMPA.half.CMPA = SWTICKS/4; // adjust duty for output EPWM3A
 
 	EPwm1Regs.TBPRD = SWTICKS/78;// TPwm=2*PWMPERIOD*SysClock
 	EPwm1Regs.TBPHS.all = 0;     // the counter value when there is a synchronize signal
