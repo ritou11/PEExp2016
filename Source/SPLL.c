@@ -9,6 +9,8 @@ float theta = 0;
 float uq_i = 0;
 float sine[sine_N];
 
+float dtheta = 0*3.1415/12;
+
 void sine_init(float* sine)
 {
 	int i;
@@ -37,5 +39,5 @@ void Update_SPLL(float u_ab, float u_bc, float u_ca)
 
 float Get_SPLL()
 {
-	return theta+3.1415/12;
+	return theta+dtheta;
 }

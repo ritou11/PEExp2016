@@ -9,7 +9,7 @@
 #define BCTRL_P 0.05
 #define CCTRL_P 0.05
 //0.25A 41V
-#define CURRENT_AIM 10.0
+#define CURRENT_AIM 0.4*10.0/0.25
 #define CURRENT_RATIO 1
 #define SIN(x) sin(x)
 #define COS(x) cos(x)
